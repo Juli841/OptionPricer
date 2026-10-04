@@ -1,5 +1,16 @@
-import OnePeriodPage from './pages/OnePeriodPage'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout'
+import AmericanPage from './pages/AmericanPage'
+import EuropeanPage from './pages/EuropeanPage'
 
 export default function App() {
-  return <OnePeriodPage />
+  return (
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/european" element={<EuropeanPage />} />
+        <Route path="/american" element={<AmericanPage />} />
+        <Route path="*" element={<Navigate to="/european" replace />} />
+      </Route>
+    </Routes>
+  )
 }

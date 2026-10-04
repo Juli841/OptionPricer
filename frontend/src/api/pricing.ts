@@ -1,4 +1,4 @@
-import type { OnePeriodParams, OnePeriodResult } from '../types/pricing'
+import type { PricingParams, PricingResult } from '../types/pricing'
 
 type ValidationItem = { loc: (string | number)[]; msg: string }
 
@@ -9,10 +9,10 @@ function errorMessage(detail: string | ValidationItem[]): string {
     : detail.map((x) => `${x.loc.at(-1)}: ${x.msg}`).join('; ')
 }
 
-export async function priceOnePeriod(params: OnePeriodParams): Promise<OnePeriodResult> {
+export async function priceMultiPeriod(params: PricingParams): Promise<PricingResult> {
   let r: Response
   try {
-    r = await fetch('/api/price/one-period', {
+    r = await fetch('/api/price/multi-period', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
