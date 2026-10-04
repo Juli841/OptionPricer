@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from backend.services.binomial import payoff
+from backend.services.helpers import trim
 
 # above this many steps the response carries only the price (trees too big to show)
 FULL_TREE_MAX_N = 12
@@ -51,8 +52,4 @@ def price_multi_period(
     if n > FULL_TREE_MAX_N:
         return MultiPeriodResult(price, q, None, None, None)
 
-    # trim each row to its real entries before converting to plain lists
-    stock = [S[i, : i + 1].tolist() for i in range(n + 1)]
-    option = [V[i, : i + 1].tolist() for i in range(n + 1)]
-    deltas = [delta[i, : i + 1].tolist() for i in range(n)]
-    return MultiPeriodResult(price, q, stock, option, deltas)
+    return MultiPeriodResult(price, q, trim(S, n + 1), trim(V, n + 1), trim(delta, n))

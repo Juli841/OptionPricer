@@ -29,3 +29,12 @@ export type PricingResult = {
   option: number[][] | null
   delta: number[][] | null // levels 0..n-1 only
 }
+
+// American adds the exercise decision and the Shreve hedge (consumption C and bond B per node)
+export type AmericanResult = PricingResult & {
+  intrinsic: number[][] | null
+  continuation: number[][] | null // levels 0..n-1
+  exercise: boolean[][] | null
+  bond: number[][] | null // levels 0..n-1
+  consumption: number[][] | null // levels 0..n-1
+}

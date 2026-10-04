@@ -10,6 +10,7 @@
   --up: #16a34a;
   --down: #dc2626;
   --node-l: 80%; /* lightness of the green-red node fill */
+  --band: rgba(79, 70, 229, 0.08);
   --error: #b42318;
 }
 
@@ -25,6 +26,7 @@
   --up: #4ade80;
   --down: #f87171;
   --node-l: 30%;
+  --band: rgba(129, 140, 248, 0.14);
   --error: #fca5a5;
 }
 
@@ -216,4 +218,56 @@ button.primary {
 
 .node text.v {
   opacity: 0.8;
+}
+
+.node.itm circle {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.level-band {
+  fill: var(--band);
+}
+
+.slider {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 8px 0;
+}
+
+.slider input {
+  width: 100%;
+  accent-color: var(--accent);
+  padding: 0;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  text-align: right;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+td.exercise {
+  color: var(--down);
+  font-weight: 600;
 }

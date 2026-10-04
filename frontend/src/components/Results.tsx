@@ -9,10 +9,10 @@ function Stat({ label, value }: { label: string; value: string }) {
   )
 }
 
-export default function Results({ params, res }: { params: PricingParams; res: PricingResult }) {
-  // first-step hedge; bond follows from the replication V0 = delta*S0 + bond
+// American results carry their own bond (after consumption); for European V0 = delta*S0 + bond
+export default function Results({ params, res }: { params: PricingParams; res: PricingResult & { bond?: number[][] | null } }) {
   const delta = res.delta?.[0][0]
-  const bond = delta === undefined ? undefined : res.price - delta * params.s0
+  const bond = res.bond?.[0][0] ?? (delta === undefined ? undefined : res.price - delta * params.s0)
 
   return (
     <div className="card">

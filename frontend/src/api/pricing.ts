@@ -1,4 +1,4 @@
-import type { PricingParams, PricingResult } from '../types/pricing'
+import type { AmericanResult, PricingParams, PricingResult } from '../types/pricing'
 
 type ValidationItem = { loc: (string | number)[]; msg: string }
 
@@ -9,10 +9,10 @@ function errorMessage(detail: string | ValidationItem[]): string {
     : detail.map((x) => `${x.loc.at(-1)}: ${x.msg}`).join('; ')
 }
 
-export async function priceMultiPeriod(params: PricingParams): Promise<PricingResult> {
+async function post<T>(url: string, params: PricingParams): Promise<T> {
   let r: Response
   try {
-    r = await fetch('/api/price/multi-period', {
+    r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
@@ -24,3 +24,6 @@ export async function priceMultiPeriod(params: PricingParams): Promise<PricingRe
   if (!r.ok) throw new Error(errorMessage(data.detail))
   return data
 }
+
+export const priceMultiPeriod = (p: PricingParams) => post<PricingResult>('/api/price/multi-period', p)
+export const priceAmerican = (p: PricingParams) => post<AmericanResult>('/api/price/american', p)

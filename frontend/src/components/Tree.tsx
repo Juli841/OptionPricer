@@ -1,3 +1,5 @@
+import type { OptionKind } from '../types/pricing'
+
 const R = 32 // node radius
 const DX = 116 // horizontal distance between levels
 const DY = 72 // vertical distance between neighbouring nodes
@@ -9,15 +11,20 @@ type Props = {
   stock: number[][]
   option: number[][]
   delta: number[][]
+  strike: number
+  kind: OptionKind
+  level: number // level picked with the slider, drawn as a highlighted column
+  ringEveryLevel: boolean // American: exercisable at every node; European: only expiry pays out
 }
 
-export default function Tree({ stock, option, delta }: Props) {
+export default function Tree({ stock, option, delta, strike, kind, level, ringEveryLevel }: Props) {
   const n = stock.length - 1
   const width = n * DX + 2 * R + 2 * PAD
   const height = n * DY + 2 * R + 2 * PAD
   // level l, j ups -> centre of node; up-moves go towards the top
   const cx = (l: number) => PAD + R + l * DX
   const cy = (l: number, j: number) => height / 2 + (l / 2 - j) * DY
+  const inTheMoney = (s: number) => (kind === 'call' ? s > strike : s < strike)
 
   // colour = option value vs the premium paid today (V0): red below, amber equal, green above.
   // each side is scaled on its own so a lopsided tree still uses the full red..green range
@@ -38,6 +45,7 @@ export default function Tree({ stock, option, delta }: Props) {
   return (
     <div className="tree-scroll">
       <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label="Binomial tree">
+        <rect className="level-band" x={cx(level) - R - 10} y={0} width={2 * R + 20} height={height} rx={12} />
         {edges.map((e) => (
           <line key={e.key} className={e.up ? 'edge-up' : 'edge-down'} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} />
         ))}
@@ -45,10 +53,11 @@ export default function Tree({ stock, option, delta }: Props) {
           row.map((s, j) => {
             const v = option[l][j]
             const d = delta[l]?.[j]
+            const itm = inTheMoney(s) && (ringEveryLevel || l === n)
             return (
-              <g key={`${l}-${j}`} className="node">
+              <g key={`${l}-${j}`} className={itm ? 'node itm' : 'node'}>
                 <title>
-                  {`step ${l}, ${j} up\nS = ${f(s)}\nV = ${f(v)}${d === undefined ? '' : `\nΔ = ${d.toFixed(4)}`}`}
+                  {`step ${l}, ${j} up${itm ? ' (in the money)' : ''}\nS = ${f(s)}\nV = ${f(v)}${d === undefined ? '' : `\nΔ = ${d.toFixed(4)}`}`}
                 </title>
                 <circle cx={cx(l)} cy={cy(l, j)} r={R} style={{ fill: fill(v) }} />
                 <text className="s" x={cx(l)} y={cy(l, j) - 3} textAnchor="middle">S {f(s)}</text>

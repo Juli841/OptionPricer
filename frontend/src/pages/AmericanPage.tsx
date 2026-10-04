@@ -1,11 +1,18 @@
+import PricingForm from '../components/PricingForm'
+import PricingView from '../components/PricingView'
+import { priceAmerican } from '../api/pricing'
+import { usePricing } from '../hooks/usePricing'
+
+const INITIAL = { kind: 'put' as const } // early exercise matters for puts
+
 export default function AmericanPage() {
+  const { form, setForm, result, error, submit } = usePricing(priceAmerican, INITIAL)
+
   return (
-    <div className="card">
-      <h2>American options</h2>
-      <p className="note">
-        Coming next: at every node the option is worth max(intrinsic value, continuation value), and the tree will
-        show the exercise / hold decision. The pricing engine is being written first.
-      </p>
-    </div>
+    <>
+      <PricingForm form={form} setForm={setForm} onSubmit={submit} />
+      {error && <p role="alert" className="error">{error}</p>}
+      {result && <PricingView params={result.params} res={result.res} />}
+    </>
   )
 }
