@@ -3,10 +3,13 @@ import type { PricingFormValues, PricingParams } from '../types/pricing'
 
 const DEFAULTS: PricingFormValues = { s0: '100', k: '100', u: '1.1', d: '0.9', r: '0.05', n: '3', kind: 'call' }
 
+const NO_INITIAL: Partial<PricingFormValues> = {} // module-level so its identity never changes
+
 // `price` must be a stable function (module-level), `initial` a stable object
+// (a fresh `{}` per render would re-run the mount effect after every render)
 export function usePricing<R>(
   price: (p: PricingParams) => Promise<R>,
-  initial: Partial<PricingFormValues> = {},
+  initial: Partial<PricingFormValues> = NO_INITIAL,
 ) {
   const [form, setForm] = useState<PricingFormValues>({ ...DEFAULTS, ...initial })
   // keep the inputs that produced the result, so the tree doesn't change while typing

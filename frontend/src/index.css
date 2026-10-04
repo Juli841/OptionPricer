@@ -11,6 +11,13 @@
   --down: #dc2626;
   --node-l: 80%; /* lightness of the green-red node fill */
   --band: rgba(79, 70, 229, 0.08);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --div-pos: #2a78d6;
+  --div-neg: #e34948;
+  --div-mid: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
   --error: #b42318;
 }
 
@@ -27,6 +34,13 @@
   --down: #f87171;
   --node-l: 30%;
   --band: rgba(129, 140, 248, 0.14);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --div-pos: #3987e5;
+  --div-neg: #e66767;
+  --div-mid: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
   --error: #fca5a5;
 }
 
@@ -42,9 +56,8 @@ body {
 }
 
 main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
+  width: 100%; /* the content uses the full page width */
+  padding: 16px 24px 48px;
   display: grid;
   grid-template-columns: minmax(0, 1fr); /* let wide trees scroll inside their card */
   gap: 16px;
@@ -57,25 +70,95 @@ header {
   gap: 12px;
 }
 
+.app {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app.collapsed {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.topbar {
+  display: flex;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 14px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+}
+
+.brand small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 nav {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-heading {
+  margin: 12px 10px 4px;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 nav a {
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+}
+
+nav a:hover {
+  background: var(--band);
 }
 
 nav a.active {
   background: var(--accent);
-  border-color: var(--accent);
   color: var(--accent-text);
   font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .nav-heading {
+    display: none;
+  }
 }
 
 h1 {
@@ -270,4 +353,140 @@ th {
 td.exercise {
   color: var(--down);
   font-weight: 600;
+}
+
+.stat-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 10px 0 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.legend .key {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.key-1,
+.key-2,
+.key-faint,
+.key-pos,
+.key-neg,
+.key-mid,
+.key-ink {
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.key-1 {
+  background: var(--series-1);
+}
+
+.key-2 {
+  background: var(--series-2);
+}
+
+.key-faint {
+  background: var(--series-1);
+  opacity: 0.7;
+}
+
+.chart {
+  margin-top: 8px;
+}
+
+.chart-tooltip {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.chart-tooltip-title {
+  font-weight: 600;
+}
+
+details {
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.table-scroll.tall {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.segmented {
+  display: inline-flex;
+  margin: 8px 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.segmented button {
+  border: none;
+  border-radius: 0;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.segmented button.on {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.key-pos {
+  background: var(--div-pos);
+}
+
+.key-neg {
+  background: var(--div-neg);
+}
+
+.key-mid {
+  background: var(--div-mid);
+}
+
+.key-ink {
+  background: var(--text);
+  height: 5px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  margin: 8px 0 4px;
+}
+
+.controls .segmented {
+  margin: 0;
+}
+
+.pick {
+  display: grid;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
 }
