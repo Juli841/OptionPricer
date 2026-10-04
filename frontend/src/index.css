@@ -1,4 +1,273 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f6fa;
+  --card: #ffffff;
+  --text: #1c2333;
+  --muted: #667085;
+  --border: #dfe3ec;
+  --accent: #4f46e5;
+  --accent-text: #ffffff;
+  --up: #16a34a;
+  --down: #dc2626;
+  --node-l: 80%; /* lightness of the green-red node fill */
+  --band: rgba(79, 70, 229, 0.08);
+  --error: #b42318;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f1420;
+  --card: #181f30;
+  --text: #e6e9f2;
+  --muted: #98a2b8;
+  --border: #2a3350;
+  --accent: #818cf8;
+  --accent-text: #0f1420;
+  --up: #4ade80;
+  --down: #f87171;
+  --node-l: 30%;
+  --band: rgba(129, 140, 248, 0.14);
+  --error: #fca5a5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* let wide trees scroll inside their card */
+  gap: 16px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+}
+
+nav a {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+nav a.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+h1 small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+input,
+select,
+button {
+  font: inherit;
+  color: var(--text);
+}
+
+input,
+select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  border-radius: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.error {
+  color: var(--error);
+  margin: 0;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 4px 0 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tree-scroll {
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.tree-scroll svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.edge-up,
+.edge-down {
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.edge-up {
+  stroke: var(--up);
+}
+
+.edge-down {
+  stroke: var(--down);
+}
+
+.node circle {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.node text {
+  fill: var(--text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.node text.v {
+  opacity: 0.8;
+}
+
+.node.itm circle {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.level-band {
+  fill: var(--band);
+}
+
+.slider {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 8px 0;
+}
+
+.slider input {
+  width: 100%;
+  accent-color: var(--accent);
+  padding: 0;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  text-align: right;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+td.exercise {
+  color: var(--down);
+  font-weight: 600;
 }

@@ -1,27 +1,72 @@
-import type { OnePeriodResult } from '../types/pricing'
+import type { OptionKind } from '../types/pricing'
 
-const f = (n: number) => n.toFixed(2)
+const R = 32 // node radius
+const DX = 116 // horizontal distance between levels
+const DY = 72 // vertical distance between neighbouring nodes
+const PAD = 16
 
-function Node({ x, y, s, v, label }: { x: number; y: number; s: number; v: number; label: string }) {
-  return (
-    <g>
-      <rect x={x - 60} y={y - 28} width={120} height={56} rx={6} fill="none" stroke="currentColor" />
-      <text x={x} y={y - 6} textAnchor="middle" fontSize={13}>{label} S = {f(s)}</text>
-      <text x={x} y={y + 14} textAnchor="middle" fontSize={13}>V = {f(v)}</text>
-    </g>
-  )
+const f = (x: number) => x.toFixed(2)
+
+type Props = {
+  stock: number[][]
+  option: number[][]
+  delta: number[][]
+  strike: number
+  kind: OptionKind
+  level: number // level picked with the slider, drawn as a highlighted column
+  ringEveryLevel: boolean // American: exercisable at every node; European: only expiry pays out
 }
 
-export default function Tree({ s0, res }: { s0: number; res: OnePeriodResult }) {
+export default function Tree({ stock, option, delta, strike, kind, level, ringEveryLevel }: Props) {
+  const n = stock.length - 1
+  const width = n * DX + 2 * R + 2 * PAD
+  const height = n * DY + 2 * R + 2 * PAD
+  // level l, j ups -> centre of node; up-moves go towards the top
+  const cx = (l: number) => PAD + R + l * DX
+  const cy = (l: number, j: number) => height / 2 + (l / 2 - j) * DY
+  const inTheMoney = (s: number) => (kind === 'call' ? s > strike : s < strike)
+
+  // colour = option value vs the premium paid today (V0): red below, amber equal, green above.
+  // each side is scaled on its own so a lopsided tree still uses the full red..green range
+  const v0 = option[0][0]
+  const all = option.flat()
+  const up = Math.max(Math.max(...all) - v0, 1e-9)
+  const down = Math.max(v0 - Math.min(...all), 1e-9)
+  const fill = (v: number) => `hsl(${60 + (v >= v0 ? 60 * ((v - v0) / up) : -60 * ((v0 - v) / down))} 65% var(--node-l))`
+
+  const edges: { x1: number; y1: number; x2: number; y2: number; up: boolean; key: string }[] = []
+  for (let l = 0; l < n; l++) {
+    for (let j = 0; j <= l; j++) {
+      edges.push({ key: `u${l}-${j}`, up: true, x1: cx(l), y1: cy(l, j), x2: cx(l + 1), y2: cy(l + 1, j + 1) })
+      edges.push({ key: `d${l}-${j}`, up: false, x1: cx(l), y1: cy(l, j), x2: cx(l + 1), y2: cy(l + 1, j) })
+    }
+  }
+
   return (
-    <svg viewBox="0 0 400 200" width="100%" style={{ maxWidth: 480 }}>
-      <line x1={120} y1={100} x2={280} y2={45} stroke="currentColor" />
-      <line x1={120} y1={100} x2={280} y2={155} stroke="currentColor" />
-      <text x={185} y={60} fontSize={12}>q = {res.q.toFixed(3)}</text>
-      <text x={170} y={150} fontSize={12}>1 − q = {(1 - res.q).toFixed(3)}</text>
-      <Node x={60} y={100} s={s0} v={res.price} label="t=0" />
-      <Node x={340} y={40} s={res.s_up} v={res.v_up} label="up" />
-      <Node x={340} y={160} s={res.s_down} v={res.v_down} label="down" />
-    </svg>
+    <div className="tree-scroll">
+      <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label="Binomial tree">
+        <rect className="level-band" x={cx(level) - R - 10} y={0} width={2 * R + 20} height={height} rx={12} />
+        {edges.map((e) => (
+          <line key={e.key} className={e.up ? 'edge-up' : 'edge-down'} x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2} />
+        ))}
+        {stock.map((row, l) =>
+          row.map((s, j) => {
+            const v = option[l][j]
+            const d = delta[l]?.[j]
+            const itm = inTheMoney(s) && (ringEveryLevel || l === n)
+            return (
+              <g key={`${l}-${j}`} className={itm ? 'node itm' : 'node'}>
+                <title>
+                  {`step ${l}, ${j} up${itm ? ' (in the money)' : ''}\nS = ${f(s)}\nV = ${f(v)}${d === undefined ? '' : `\nΔ = ${d.toFixed(4)}`}`}
+                </title>
+                <circle cx={cx(l)} cy={cy(l, j)} r={R} style={{ fill: fill(v) }} />
+                <text className="s" x={cx(l)} y={cy(l, j) - 3} textAnchor="middle">S {f(s)}</text>
+                <text className="v" x={cx(l)} y={cy(l, j) + 13} textAnchor="middle">V {f(v)}</text>
+              </g>
+            )
+          }),
+        )}
+      </svg>
+    </div>
   )
 }
