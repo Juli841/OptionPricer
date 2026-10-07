@@ -12,8 +12,19 @@ export default function Layout() {
       {sidebar.open && (
         <aside className="sidebar">
           <div className="brand">
-            <h1>Option Pricer</h1>
-            <small>binomial model</small>
+            <div>
+              <h1>Option Pricer</h1>
+              <small>binomial model</small>
+            </div>
+            <button
+              type="button"
+              className="ghost collapse"
+              onClick={sidebar.toggle}
+              aria-label="Hide sidebar"
+              aria-expanded
+            >
+              ‹
+            </button>
           </div>
           <nav>
             <span className="nav-heading">Pricing</span>
@@ -21,22 +32,23 @@ export default function Layout() {
             <NavLink to="/american">American</NavLink>
             <span className="nav-heading">Simulation</span>
             <NavLink to="/paths">Paths</NavLink>
+            <NavLink to="/hedging">Hedging</NavLink>
           </nav>
           <ThemeToggle theme={theme} onToggle={toggle} />
         </aside>
       )}
       <main>
-        <div className="topbar">
+        {!sidebar.open && (
           <button
             type="button"
-            className="ghost"
+            className="ghost edge-tab"
             onClick={sidebar.toggle}
-            aria-label={sidebar.open ? 'Hide sidebar' : 'Show sidebar'}
-            aria-expanded={sidebar.open}
+            aria-label="Show sidebar"
+            aria-expanded={false}
           >
-            {sidebar.open ? '« Hide menu' : '☰ Menu'}
+            ›
           </button>
-        </div>
+        )}
         <Outlet />
       </main>
     </div>

@@ -80,8 +80,30 @@ header {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.topbar {
+.brand {
   display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+button.collapse {
+  padding: 2px 9px;
+  font-size: 1.1rem;
+  line-height: 1.2;
+}
+
+button.edge-tab {
+  position: fixed;
+  left: 0;
+  top: 20px;
+  z-index: 10;
+  padding: 10px 8px;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  background: var(--card);
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .sidebar {
@@ -489,4 +511,32 @@ summary {
   gap: 4px;
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+.path-builder {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+button.chip {
+  width: 36px;
+  padding: 6px 0;
+  font-weight: 700;
+}
+
+button.chip.up,
+td.move-up {
+  color: var(--up);
+}
+
+button.chip.down {
+  color: var(--down);
 }

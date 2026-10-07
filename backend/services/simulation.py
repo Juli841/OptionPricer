@@ -36,11 +36,9 @@ def simulate_paths(
     up = rng.random((paths, n)) < p
     total_ups = up.sum(axis=1)
     ups_counts = np.bincount(total_ups, minlength=n + 1)
-    # TODO: terminal prices straight from the ups: s0 * u**total_ups * d**(n - total_ups)
-    #       (no need for a paths x steps price matrix, only the sample paths need every step)
+
     terminal_prices = s0 * u ** total_ups * d ** (n - total_ups)
-    # TODO: sample paths: take up[:N_SAMPLE], running ups with np.cumsum(..., axis=1), put a column of zeros
-    #       in front, then S = s0 * u**ups * d**(step - ups) where step = np.arange(n + 1)
+
     running_ups = np.cumsum(up[:N_SAMPLE], axis=1)
     running_ups = np.column_stack([
         np.zeros(len(up[:N_SAMPLE]), dtype=int),
@@ -52,14 +50,14 @@ def simulate_paths(
             * u ** running_ups
             * d ** (step - running_ups)
     )
-    # TODO: terminal_mean / terminal_std from the terminal prices (decide: ddof=0 or 1?)
+    # terminal_mean / terminal_std from the terminal prices (decide: ddof=0 or 1?)
     emp_mean = np.mean(terminal_prices)
     emp_std = np.std(terminal_prices,ddof = 0)
-    # TODO: theoretical mean: s0 * (p*u + (1-p)*d)**n
-    #       theoretical variance: s0**2 * ((p*u**2 + (1-p)*d**2)**n - (p*u + (1-p)*d)**(2*n))
+    # theoretical mean: s0 * (p*u + (1-p)*d)**n
+    # theoretical variance: s0**2 * ((p*u**2 + (1-p)*d**2)**n - (p*u + (1-p)*d)**(2*n))
     mean = s0 * (p*u + (1-p)*d)**n
     std = np.sqrt(max(s0 ** 2 * ((p*u**2 + (1-p)*d**2) ** n - (p*u + (1-p)*d)**(2*n)), 0))
-    # TODO: return SimulationResult(...) with plain lists (.tolist()) and floats
+
     smp_paths = sample_prices.tolist()
     return SimulationResult(p, smp_paths, ups_counts.tolist(),emp_mean, emp_std, mean, std)
 
