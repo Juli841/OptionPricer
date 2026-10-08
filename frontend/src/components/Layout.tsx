@@ -33,6 +33,8 @@ export default function Layout() {
             <span className="nav-heading">Simulation</span>
             <NavLink to="/paths">Paths</NavLink>
             <NavLink to="/hedging">Hedging</NavLink>
+            <span className="nav-heading">Continuous time</span>
+            <NavLink to="/continuous">GBM</NavLink>
           </nav>
           <ThemeToggle theme={theme} onToggle={toggle} />
         </aside>

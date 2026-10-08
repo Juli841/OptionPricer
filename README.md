@@ -8,9 +8,9 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
-![Status](https://img.shields.io/badge/roadmap-5%20of%2015%20steps-orange)
+![Status](https://img.shields.io/badge/roadmap-6%20of%2015%20steps-orange)
 
-A learning project with a real engineering shape: a tested numerical backend (Python, NumPy, FastAPI) and a typed React frontend that makes the mathematics visible. It is built step by step from a [15-step roadmap](options_pricing_hedging_simulator_roadmap.md) towards a derivatives analytics platform. **Steps 1–5 are done.**
+A learning project with a real engineering shape: a tested numerical backend (Python, NumPy, FastAPI) and a typed React frontend that makes the mathematics visible. It is built step by step from a [15-step roadmap](options_pricing_hedging_simulator_roadmap.md) towards a derivatives analytics platform. **Steps 1–6 are done.**
 
 <!-- Add screenshots here: the European tree and the Hedging page -->
 
@@ -35,6 +35,7 @@ A learning project with a real engineering shape: a tested numerical backend (Py
 | **American** | The same tree for American options. Shows the exercise-or-hold decision at every node, plus the hedge with **consumption** (Shreve's formulation): intrinsic value, continuation value, consumption and bond. |
 | **Paths** | Monte Carlo simulation of stock paths under the real-world probability *p* or the risk-neutral probability *q*. Sample paths (centred on the mean or as prices, with click-to-highlight) and a histogram of up-moves against the exact binomial distribution, with empirical vs theoretical mean and standard deviation. |
 | **Hedging** | Pick a path (flip up/down steps by hand, or randomise it) and watch a self-financing portfolio of shares and cash replicate the option. The portfolio equals the option value **at every time step**, and the payoff at expiry. |
+| **GBM** | Continuous-time model with annualised μ, σ, r and T in years. Exact geometric Brownian motion paths against the expected path S₀e^(μt), the terminal and log-return moments against their closed forms, and the histogram of ln(S_T/S₀) against its normal density. A CRR panel prices a European option on a tree with u = e^(σ√Δt), d = 1/u and shows the price converging as the tree grows. |
 
 Also: light/dark theme (follows the system, saved locally), collapsible sidebar, seeded and reproducible simulations, input validation with readable errors.
 
@@ -58,7 +59,7 @@ Over one period a stock goes up by a factor *u* or down by *d*. A call or put pa
 ```
 backend/
   main.py          builds the FastAPI app, includes the routers
-  controllers/     HTTP routes (health, pricing, simulation, hedging); engine errors become 422s
+  controllers/     HTTP routes (health, pricing, simulation, hedging, continuous); engine errors become 422s
   schemas/         Pydantic request models and validation (caps, no-arbitrage guards)
   services/        pure Python / NumPy engines, no web code:
                      binomial.py      one-period price, delta, bond
@@ -66,14 +67,15 @@ backend/
                      american.py      American tree with exercise + consumption
                      simulation.py    vectorised random-walk path simulator
                      hedging.py       replication along a given path
+                     continuous.py    GBM simulator, CRR parametrisation, Model interface
   tests/           pytest suites per engine
 frontend/src/
   api/ hooks/ types/   typed fetch clients, state hooks, shared types per feature
   components/          forms, tree, level inspector, charts, tables
-  pages/               European, American, Paths, Hedging
+  pages/               European, American, Paths, Hedging, Continuous
 ```
 
-Engines are kept free of web code so they can be tested directly and reused in later steps (Monte Carlo pricing, Greeks, discrete hedging).
+Engines are kept free of web code so they can be tested directly and reused in later steps (Monte Carlo pricing, Greeks, discrete hedging). `BinomialModel` and `GBM` share one small `Model` interface (`sample()` returns a `(paths, n+1)` price array), so later steps can switch models without redesigning the app.
 
 ## API
 
@@ -85,6 +87,8 @@ Engines are kept free of web code so they can be tested directly and reused in l
 | POST | `/api/price/american` | American tree with exercise, continuation, consumption, bond |
 | POST | `/api/simulate` | random paths, up-move histogram, empirical vs theoretical moments |
 | POST | `/api/hedge` | replicating portfolio along a given up/down path |
+| POST | `/api/gbm/simulate` | exact GBM paths, terminal and log-return moments, log-return histogram |
+| POST | `/api/gbm/crr` | European price on the CRR tree built from (σ, r, T, n), with u, d, q |
 
 Invalid input and arbitrage (`d < 1 + r < u` violated) return `422` with a readable message. FastAPI also serves interactive docs at `/docs` when the backend is running.
 
@@ -109,7 +113,7 @@ npm run dev                                       # http://localhost:5173
 ## Testing
 
 ```bash
-python -m pytest backend/tests                    # 74 tests
+python -m pytest backend/tests                    # 94 tests
 cd frontend && npx tsc -b && npx eslint . && npm run build
 ```
 
@@ -120,6 +124,7 @@ The engines are checked against independent references rather than only against 
 - **American:** the wealth equation δ·S′ + (1+r)·bond = V′ holds at every node, and the American value is at least the European value and the intrinsic value.
 - **Simulation:** the same seed reproduces, empirical mean and std agree with the closed forms, degenerate probabilities (p = 0, 1) behave, and caps are enforced.
 - **Hedging:** for every one of the 64 paths of length 6, for calls and puts, the final portfolio equals the payoff and the portfolio equals the option value at every step.
+- **Continuous time:** the same seed reproduces, terminal and log-return moments match the closed forms, the number of steps does not change the law of S_T (exact GBM steps), and the CRR price converges to the Black–Scholes value (used only as an independent limit; Black–Scholes itself is Step 8) and satisfies put–call parity with a continuous rate.
 - **Inputs:** arbitrage, out-of-range sizes and malformed paths are rejected.
 
 There are no automated UI or API integration tests yet; the endpoints have been checked by hand with `curl`.
@@ -133,7 +138,7 @@ The full plan is in [`options_pricing_hedging_simulator_roadmap.md`](options_pri
 - [x] 3. American options (early exercise, consumption)
 - [x] 4. Path simulator
 - [x] 5. Hedging simulator (replication along a path)
-- [ ] 6. Continuous-time asset models
+- [x] 6. Continuous-time asset models
 - [ ] 7. Monte Carlo option pricing
 - [ ] 8. Black–Scholes
 - [ ] 9. Greeks
@@ -143,7 +148,7 @@ The full plan is in [`options_pricing_hedging_simulator_roadmap.md`](options_pri
 ## Known limitations
 
 - Full trees and the hedging table are limited to n ≤ 12 (larger n returns the price only, up to n = 1000). The Hedging page is European-only for now.
-- The rate *r* is per step (`1 + r`). A continuous-time convention comes with Step 6.
+- The rate *r* is per step (`1 + r`) on the binomial pages; only the GBM page uses an annual, continuously compounded rate.
 - Node colours compare an option value to the initial premium, undiscounted. This is a visual heuristic, not a P&L.
 - The sample standard deviation of terminal prices uses `ddof=0`; the choice is still open.
 - No API-level automated tests yet.

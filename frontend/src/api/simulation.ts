@@ -2,7 +2,7 @@ import type { SimulationParams, SimulationResult } from '../types/simulation'
 
 type ValidationItem = { loc: (string | number)[]; msg: string }
 
-function errorMessage(detail: string | ValidationItem[]): string {
+export function errorMessage(detail: string | ValidationItem[]): string {
   return typeof detail === 'string'
     ? detail
     : detail.map((x) => `${x.loc.at(-1)}: ${x.msg}`).join('; ')
