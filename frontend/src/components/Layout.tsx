@@ -35,6 +35,8 @@ export default function Layout() {
             <NavLink to="/hedging">Hedging</NavLink>
             <span className="nav-heading">Continuous time</span>
             <NavLink to="/continuous">GBM</NavLink>
+            <span className="nav-heading">Monte Carlo</span>
+            <NavLink to="/montecarlo">Pricing</NavLink>
           </nav>
           <ThemeToggle theme={theme} onToggle={toggle} />
         </aside>
