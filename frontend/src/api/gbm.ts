@@ -1,7 +1,7 @@
 import type { CrrParams, CrrResult, GbmParams, GbmResult } from '../types/gbm'
 import { errorMessage } from './simulation'
 
-async function post<T>(url: string, body: unknown): Promise<T> {
+export async function post<T>(url: string, body: unknown): Promise<T> {
   let r: Response
   try {
     r = await fetch(url, {

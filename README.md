@@ -36,6 +36,7 @@ A learning project with a real engineering shape: a tested numerical backend (Py
 | **Paths** | Monte Carlo simulation of stock paths under the real-world probability *p* or the risk-neutral probability *q*. Sample paths (centred on the mean or as prices, with click-to-highlight) and a histogram of up-moves against the exact binomial distribution, with empirical vs theoretical mean and standard deviation. |
 | **Hedging** | Pick a path (flip up/down steps by hand, or randomise it) and watch a self-financing portfolio of shares and cash replicate the option. The portfolio equals the option value **at every time step**, and the payoff at expiry. |
 | **GBM** | Continuous-time model with annualised μ, σ, r and T in years. Exact geometric Brownian motion paths against the expected path S₀e^(μt), the terminal and log-return moments against their closed forms, and the histogram of ln(S_T/S₀) against its normal density. A CRR panel prices a European option on a tree with u = e^(σ√Δt), d = 1/u and shows the price converging as the tree grows. |
+| **Monte Carlo** | Price a European call or put as the discounted mean payoff over M risk-neutral GBM paths (drift r). Shows the price, standard error and 95% confidence interval, and a convergence plot (running estimate with its band narrowing like 1/√M) against a fine CRR tree as an independent reference. |
 
 Also: light/dark theme (follows the system, saved locally), collapsible sidebar, seeded and reproducible simulations, input validation with readable errors.
 
@@ -113,7 +114,7 @@ npm run dev                                       # http://localhost:5173
 ## Testing
 
 ```bash
-python -m pytest backend/tests                    # 94 tests
+python -m pytest backend/tests                    # 103 tests
 cd frontend && npx tsc -b && npx eslint . && npm run build
 ```
 
@@ -139,7 +140,7 @@ The full plan is in [`options_pricing_hedging_simulator_roadmap.md`](options_pri
 - [x] 4. Path simulator
 - [x] 5. Hedging simulator (replication along a path)
 - [x] 6. Continuous-time asset models
-- [ ] 7. Monte Carlo option pricing
+- [x] 7. Monte Carlo option pricing
 - [ ] 8. Black–Scholes
 - [ ] 9. Greeks
 - [ ] 10. Realistic discrete delta-hedging and hedging error
