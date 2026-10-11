@@ -10,11 +10,6 @@ router = APIRouter(prefix="/api")
 
 @router.post("/simulate")
 def simulate(req: SimulationRequest):
-    # TODO: pick the probability: p = req.p for "real_world"; for "risk_neutral" q = (1 + r - d) / (u - d)
-    #       (q is only a probability if d < 1 + r < u: reject anything else with HTTPException 422)
-    # TODO: call simulate_paths(req.s0, req.u, req.d, req.n, p, req.paths, req.seed)
-    # TODO: ValueError from the engine -> HTTPException(status_code=422, detail=str(e))
-    # TODO: return dataclasses.asdict(result)
     if(req.measure == "real_world"):
         p = req.p
     elif(req.measure == "risk_neutral"):

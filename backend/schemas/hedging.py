@@ -12,5 +12,4 @@ class HedgeRequest(BaseModel):
     d: float = Field(gt=0)
     r: float
     kind: Literal["call", "put"]
-    # TODO: moves: list[bool] with 1..FULL_TREE_MAX_N entries (True = up). Hint: Field(min_length=..., max_length=...)
     moves: list[bool] = Field(min_length = 1, max_length = FULL_TREE_MAX_N)
