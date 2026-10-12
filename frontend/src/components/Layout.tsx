@@ -37,6 +37,8 @@ export default function Layout() {
             <NavLink to="/continuous">GBM</NavLink>
             <span className="nav-heading">Monte Carlo</span>
             <NavLink to="/montecarlo">Pricing</NavLink>
+            <span className="nav-heading">Closed form</span>
+            <NavLink to="/blackscholes">Black–Scholes</NavLink>
           </nav>
           <ThemeToggle theme={theme} onToggle={toggle} />
         </aside>

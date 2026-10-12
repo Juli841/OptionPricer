@@ -11,8 +11,6 @@ router = APIRouter(prefix="/api/mc")
 
 @router.post("/price")
 def price(req: McRequest):
-    # TODO: under Q the drift is r, so model = GBM(req.r, req.sigma); call price_mc; ValueError -> 422;
-    #       return dataclasses.asdict(result)  (same pattern as controllers/hedging.py)
     try:
         model = GBM(req.r, req.sigma)
         result = price_mc(model, req.s0, req.k, req.r, req.T,  req.paths, req.kind, req.seed)
