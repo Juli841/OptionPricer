@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import AmericanPage from './pages/AmericanPage'
+import BlackScholesPage from './pages/BlackScholesPage'
 import ContinuousPage from './pages/ContinuousPage'
 import EuropeanPage from './pages/EuropeanPage'
 import HedgingPage from './pages/HedgingPage'
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/hedging" element={<HedgingPage />} />
         <Route path="/continuous" element={<ContinuousPage />} />
         <Route path="/montecarlo" element={<MonteCarloPage />} />
+        <Route path="/blackscholes" element={<BlackScholesPage />} />
         <Route path="*" element={<Navigate to="/european" replace />} />
       </Route>
     </Routes>
