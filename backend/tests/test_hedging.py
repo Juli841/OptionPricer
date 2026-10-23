@@ -2,8 +2,8 @@ import itertools
 
 import pytest
 
-from backend.services.hedging import replicate
-from backend.services.multi_period import price_multi_period
+from backend.pricing.services.hedging import replicate
+from backend.pricing.services.multi_period import price_multi_period
 
 S0, K, U, D, R = 100, 100, 1.1, 0.9, 0.05
 

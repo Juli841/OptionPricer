@@ -8,9 +8,10 @@
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
-![Status](https://img.shields.io/badge/roadmap-6%20of%2015%20steps-orange)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Status](https://img.shields.io/badge/roadmap-8%20of%2015%20steps-orange)
 
-A learning project with a real engineering shape: a tested numerical backend (Python, NumPy, FastAPI) and a typed React frontend that makes the mathematics visible. It is built step by step from a [15-step roadmap](options_pricing_hedging_simulator_roadmap.md) towards a derivatives analytics platform. **Steps 1–6 are done.**
+A learning project with a real engineering shape: a tested numerical backend (Python, NumPy, FastAPI) and a typed React frontend that makes the mathematics visible. It is built step by step from a [15-step roadmap](options_pricing_hedging_simulator_roadmap.md) towards a derivatives analytics platform. **Steps 1–8 are done**, plus user accounts (register, login, profile photo, username).
 
 <!-- Add screenshots here: the European tree and the Hedging page -->
 
@@ -19,6 +20,7 @@ A learning project with a real engineering shape: a tested numerical backend (Py
 - [Features](#features)
 - [The finance in one paragraph](#the-finance-in-one-paragraph)
 - [Tech stack](#tech-stack)
+- [Accounts and security](#accounts-and-security)
 - [Architecture](#architecture)
 - [API](#api)
 - [Getting started](#getting-started)
@@ -37,8 +39,10 @@ A learning project with a real engineering shape: a tested numerical backend (Py
 | **Hedging** | Pick a path (flip up/down steps by hand, or randomise it) and watch a self-financing portfolio of shares and cash replicate the option. The portfolio equals the option value **at every time step**, and the payoff at expiry. |
 | **GBM** | Continuous-time model with annualised μ, σ, r and T in years. Exact geometric Brownian motion paths against the expected path S₀e^(μt), the terminal and log-return moments against their closed forms, and the histogram of ln(S_T/S₀) against its normal density. A CRR panel prices a European option on a tree with u = e^(σ√Δt), d = 1/u and shows the price converging as the tree grows. |
 | **Monte Carlo** | Price a European call or put as the discounted mean payoff over M risk-neutral GBM paths (drift r). Shows the price, standard error and 95% confidence interval, and a convergence plot (running estimate with its band narrowing like 1/√M) against a fine CRR tree as an independent reference. |
+| **Black–Scholes** | Closed-form price of a European call or put with d₁, d₂, N(d₁) (the delta) and N(d₂). A convergence table compares it with a 1000-step CRR tree and a 200 000-path Monte Carlo run (with its confidence interval), and a chart plots the price against S₀ next to the payoff at expiry. |
+| **Welcome and account** | A welcome page links to every tool. Register and log in with email, username and a strong password (live strength meter, show/hide eye). The account page holds your profile photo (upload, change, remove) and lets you change your username. Only the account page needs a login; the pricing pages stay open. |
 
-Also: light/dark theme (follows the system, saved locally), collapsible sidebar, seeded and reproducible simulations, input validation with readable errors.
+Also: light/dark theme (follows the system, saved locally, toggle in the top bar), collapsible sidebar, seeded and reproducible simulations, input validation with readable errors.
 
 ## The finance in one paragraph
 
@@ -49,31 +53,57 @@ Over one period a stock goes up by a factor *u* or down by *d*. A call or put pa
 | Layer | Technology |
 |---|---|
 | Backend | Python, FastAPI, Pydantic, Uvicorn |
-| Numerics | NumPy (vectorised backward induction and path simulation) |
+| Accounts | PostgreSQL, SQLAlchemy, argon2-cffi (password hashes), PyJWT (session token in an httpOnly cookie) |
+| Numerics | NumPy (vectorised backward induction and path simulation), SciPy (normal distribution for Black–Scholes) |
 | Frontend | React 19, TypeScript, Vite, React Router |
 | Charts | Recharts for paths and histograms, hand-written SVG for the trees |
 | Testing | pytest (backend); `tsc`, ESLint and a production build (frontend) |
 | Dev setup | the Vite dev server proxies `/api` to the FastAPI app |
 
+## Accounts and security
+
+Login is deliberately plain session-cookie authentication, not OAuth.
+
+- **Passwords** are hashed with argon2 (random salt, never stored or logged). Registration enforces 8–128 characters with a lowercase letter, an uppercase letter, a number and a symbol, on the server and in the form (the rules live in `backend/user/schemas/auth.py` and `frontend/src/utils/password.ts`; keep them in sync). Login accepts any stored password.
+- **Session:** after login the server sets a signed JWT (1 hour) in an `httpOnly`, `SameSite=Lax` cookie, so page JavaScript cannot read it. `COOKIE_SECURE=1` adds the `Secure` flag behind HTTPS. `current_user` (`backend/user/session.py`) is the dependency that protects a route.
+- **Errors do not leak:** a wrong email and a wrong password give the same 401 message, and every authentication failure on a protected route gives one "Not authenticated".
+- **Emails** are normalised (Unicode NFKC, trimmed, case-folded) and unique case-insensitively; **usernames** (3–20 letters, digits or `_`) are unique case-insensitively through a database index, which also settles two simultaneous sign-ups.
+- **Profile photo:** PNG, JPEG or WebP up to 2 MB, stored in Postgres. The type is decided from the file's first bytes, not from what the browser claims, and the size is checked while reading.
+
+Not done yet (see [Known limitations](#known-limitations)): rate limiting, email verification, password reset, token revocation, two-step authentication.
+
 ## Architecture
 
 ```
 backend/
-  main.py          builds the FastAPI app, includes the routers
-  controllers/     HTTP routes (health, pricing, simulation, hedging, continuous); engine errors become 422s
-  schemas/         Pydantic request models and validation (caps, no-arbitrage guards)
-  services/        pure Python / NumPy engines, no web code:
-                     binomial.py      one-period price, delta, bond
-                     multi_period.py  n-period European tree
-                     american.py      American tree with exercise + consumption
-                     simulation.py    vectorised random-walk path simulator
-                     hedging.py       replication along a given path
-                     continuous.py    GBM simulator, CRR parametrisation, Model interface
-  tests/           pytest suites per engine
+  main.py            builds the FastAPI app, creates the tables, includes the routers
+  db.py              SQLAlchemy engine, session per request, Base
+  pricing/
+    controllers/     HTTP routes (health, pricing, simulation, hedging, continuous, montecarlo, blackscholes);
+                     engine errors become 422s
+    schemas/         Pydantic request models and validation (caps, no-arbitrage guards)
+    services/        pure Python / NumPy engines, no web code:
+                       binomial.py      one-period price, delta, bond
+                       multi_period.py  n-period European tree
+                       american.py      American tree with exercise + consumption
+                       simulation.py    vectorised random-walk path simulator
+                       hedging.py       replication along a given path
+                       continuous.py    GBM simulator, CRR parametrisation, Model interface
+                       montecarlo.py    Monte Carlo pricer with convergence series
+                       blackscholes.py  closed-form price, d1, d2, N(d1), N(d2)
+  user/
+    controllers/     auth.py (register, login, logout, me, username), avatar.py (photo)
+    schemas/         credentials, registration rules, user output
+    services/        auth.py (hashing, tokens, register), avatar.py (validation, storage)
+    models/          user.py (the users table)
+    session.py       cookie helpers and the current_user dependency
+  tests/             pytest suites per engine, plus accounts
 frontend/src/
-  api/ hooks/ types/   typed fetch clients, state hooks, shared types per feature
-  components/          forms, tree, level inspector, charts, tables
-  pages/               European, American, Paths, Hedging, Continuous
+  api/ hooks/ types/ utils/   typed fetch clients, state hooks, shared types, password and username rules
+  context/ + AuthProvider     who is logged in (useAuth)
+  components/                 forms, trees, charts, tables, avatar, password meter, route guard, layout
+  pages/                      Welcome, European, American, Paths, Hedging, Continuous, MonteCarlo,
+                              BlackScholes, Login/Register, Account
 ```
 
 Engines are kept free of web code so they can be tested directly and reused in later steps (Monte Carlo pricing, Greeks, discrete hedging). `BinomialModel` and `GBM` share one small `Model` interface (`sample()` returns a `(paths, n+1)` price array), so later steps can switch models without redesigning the app.
@@ -90,12 +120,35 @@ Engines are kept free of web code so they can be tested directly and reused in l
 | POST | `/api/hedge` | replicating portfolio along a given up/down path |
 | POST | `/api/gbm/simulate` | exact GBM paths, terminal and log-return moments, log-return histogram |
 | POST | `/api/gbm/crr` | European price on the CRR tree built from (σ, r, T, n), with u, d, q |
+| POST | `/api/mc/price` | Monte Carlo price, standard error, 95% interval and convergence series |
+| POST | `/api/bs/price` | Black–Scholes price with d₁, d₂, N(d₁), N(d₂) |
+| POST | `/api/auth/register` | create an account (email, username, password) and log in (201) |
+| POST | `/api/auth/login` | log in with email and password, sets the session cookie |
+| POST | `/api/auth/logout` | clears the cookie (204) |
+| GET | `/api/auth/me` | the logged-in user; 401 otherwise |
+| PATCH | `/api/auth/username` | change your username |
+| POST / GET / DELETE | `/api/auth/avatar` | upload, fetch or remove your profile photo |
 
-Invalid input and arbitrage (`d < 1 + r < u` violated) return `422` with a readable message. FastAPI also serves interactive docs at `/docs` when the backend is running.
+Invalid input and arbitrage (`d < 1 + r < u` violated) return `422` with a readable message; a taken email or username returns `409`; a missing or bad session returns `401`. FastAPI also serves interactive docs at `/docs` when the backend is running.
 
 ## Getting started
 
-Requirements: Python 3.11+ and Node 20+.
+Requirements: Python 3.11+, Node 20+ and a running PostgreSQL.
+
+Create a database and a `.env` file at the repo root (it is git-ignored):
+
+```sql
+CREATE USER optionpricer WITH PASSWORD 'choose-one';
+CREATE DATABASE optionpricer OWNER optionpricer;
+```
+
+```
+DATABASE_URL=postgresql+psycopg://optionpricer:choose-one@localhost:5432/optionpricer
+JWT_SECRET=<64 random hex characters, e.g. python -c "import secrets; print(secrets.token_hex(32))">
+COOKIE_SECURE=0   # set to 1 behind HTTPS
+```
+
+The tables are created on startup. There are no migrations yet: if a model gains a column, add it to the existing table by hand (`ALTER TABLE ...`).
 
 ```bash
 git clone https://github.com/Juli841/OptionPricer.git
@@ -114,7 +167,7 @@ npm run dev                                       # http://localhost:5173
 ## Testing
 
 ```bash
-python -m pytest backend/tests                    # 103 tests
+python -m pytest backend/tests                    # 129 tests
 cd frontend && npx tsc -b && npx eslint . && npm run build
 ```
 
@@ -126,9 +179,11 @@ The engines are checked against independent references rather than only against 
 - **Simulation:** the same seed reproduces, empirical mean and std agree with the closed forms, degenerate probabilities (p = 0, 1) behave, and caps are enforced.
 - **Hedging:** for every one of the 64 paths of length 6, for calls and puts, the final portfolio equals the payoff and the portfolio equals the option value at every step.
 - **Continuous time:** the same seed reproduces, terminal and log-return moments match the closed forms, the number of steps does not change the law of S_T (exact GBM steps), and the CRR price converges to the Black–Scholes value (used only as an independent limit; Black–Scholes itself is Step 8) and satisfies put–call parity with a continuous rate.
+- **Monte Carlo and Black–Scholes:** the Monte Carlo price agrees with a fine CRR tree within the standard error, the running variance stays finite on near-constant payoffs, and Black–Scholes satisfies put–call parity and matches the CRR limit.
+- **Accounts:** password hashes are salted and verify, tokens round-trip and reject tampering, weak passwords and malformed usernames are rejected, avatar types are detected from bytes (an HTML file labelled PNG is refused), and oversized or empty images fail before the database is touched. The register, login, session and photo flows were also exercised end to end against Postgres with FastAPI's test client.
 - **Inputs:** arbitrage, out-of-range sizes and malformed paths are rejected.
 
-There are no automated UI or API integration tests yet; the endpoints have been checked by hand with `curl`.
+There are no automated UI tests, and the database-backed account flow is checked by script rather than in the test suite.
 
 ## Roadmap
 
@@ -141,7 +196,7 @@ The full plan is in [`options_pricing_hedging_simulator_roadmap.md`](options_pri
 - [x] 5. Hedging simulator (replication along a path)
 - [x] 6. Continuous-time asset models
 - [x] 7. Monte Carlo option pricing
-- [ ] 8. Black–Scholes
+- [x] 8. Black–Scholes
 - [ ] 9. Greeks
 - [ ] 10. Realistic discrete delta-hedging and hedging error
 - [ ] 11–15. More derivatives, implied volatility, variance reduction, advanced models, analytics platform
@@ -152,7 +207,10 @@ The full plan is in [`options_pricing_hedging_simulator_roadmap.md`](options_pri
 - The rate *r* is per step (`1 + r`) on the binomial pages; only the GBM page uses an annual, continuously compounded rate.
 - Node colours compare an option value to the initial premium, undiscounted. This is a visual heuristic, not a P&L.
 - The sample standard deviation of terminal prices uses `ddof=0`; the choice is still open.
-- No API-level automated tests yet.
+- The pricing endpoints are open to anyone, including the expensive Monte Carlo one (up to 10⁶ paths); there is no rate limiting.
+- Accounts: no rate limiting on login, no email verification or password reset, no way to revoke a token before its hour is up, and no two-step authentication.
+- No database migrations; schema changes are applied by hand.
+- No API-level automated tests for the pricing endpoints.
 
 ## How this was built
 

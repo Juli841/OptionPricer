@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from backend.services.continuous import MAX_PATHS, MAX_STEPS
+from backend.pricing.services.continuous import MAX_PATHS, MAX_STEPS
 
 
 class GbmRequest(BaseModel):

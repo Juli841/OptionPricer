@@ -6,9 +6,9 @@ from dataclasses import dataclass
 from typing import Protocol
 
 import numpy as np
-from backend.services.multi_period import MultiPeriodResult
-from backend.services.multi_period import price_multi_period
-from backend.services.simulation import N_SAMPLE
+from backend.pricing.services.multi_period import MultiPeriodResult
+from backend.pricing.services.multi_period import price_multi_period
+from backend.pricing.services.simulation import N_SAMPLE
 
 MAX_PATHS = 100_000
 MAX_STEPS = 1000

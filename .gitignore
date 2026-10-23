@@ -6,3 +6,5 @@ node_modules/
 dist/
 PROGRESS.md
 graphify-out/
+.env
+.claude/

@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from backend.services.multi_period import FULL_TREE_MAX_N
+from backend.pricing.services.multi_period import FULL_TREE_MAX_N
 
 
 class HedgeRequest(BaseModel):

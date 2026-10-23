@@ -1,6 +1,6 @@
 import pytest
 
-from backend.services.binomial import payoff, price_one_period
+from backend.pricing.services.binomial import payoff, price_one_period
 
 S0, K, U, D, R = 100, 100, 1.1, 0.9, 0.05
 

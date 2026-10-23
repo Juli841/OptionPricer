@@ -1,8 +1,8 @@
 """Step 5: replicate a European option along ONE given path (self-financing portfolio)."""
 from dataclasses import dataclass
 
-from backend.services.multi_period import FULL_TREE_MAX_N, price_multi_period
-from backend.services.binomial import payoff
+from backend.pricing.services.multi_period import FULL_TREE_MAX_N, price_multi_period
+from backend.pricing.services.binomial import payoff
 
 @dataclass
 class HedgeStep:

@@ -2,10 +2,10 @@ import dataclasses
 
 from fastapi import APIRouter, HTTPException
 
-from backend.schemas.pricing import MultiPeriodRequest, OnePeriodRequest
-from backend.services.binomial import price_one_period
-from backend.services.multi_period import price_multi_period
-from backend.services.american import price_american
+from backend.pricing.schemas.pricing import MultiPeriodRequest, OnePeriodRequest
+from backend.pricing.services.binomial import price_one_period
+from backend.pricing.services.multi_period import price_multi_period
+from backend.pricing.services.american import price_american
 
 router = APIRouter(prefix="/api/price")
 

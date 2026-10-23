@@ -2,8 +2,8 @@ import dataclasses
 
 from fastapi import APIRouter, HTTPException
 
-from backend.schemas.hedging import HedgeRequest
-from backend.services.hedging import replicate
+from backend.pricing.schemas.hedging import HedgeRequest
+from backend.pricing.services.hedging import replicate
 
 router = APIRouter(prefix="/api")
 

@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from backend.services.binomial import payoff
-from backend.services.helpers import trim
+from backend.pricing.services.binomial import payoff
+from backend.pricing.services.helpers import trim
 
 # above this many steps the response carries only the price (trees too big to show)
 FULL_TREE_MAX_N = 12

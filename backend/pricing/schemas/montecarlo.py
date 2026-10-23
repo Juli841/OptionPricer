@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from backend.services.montecarlo import MAX_MC_PATHS
+from backend.pricing.services.montecarlo import MAX_MC_PATHS
 
 
 class McRequest(BaseModel):

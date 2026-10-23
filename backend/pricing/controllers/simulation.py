@@ -2,8 +2,8 @@ import dataclasses
 
 from fastapi import APIRouter, HTTPException
 
-from backend.schemas.simulation import SimulationRequest
-from backend.services.simulation import simulate_paths
+from backend.pricing.schemas.simulation import SimulationRequest
+from backend.pricing.services.simulation import simulate_paths
 
 router = APIRouter(prefix="/api")
 

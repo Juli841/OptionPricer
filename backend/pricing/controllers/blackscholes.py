@@ -2,8 +2,8 @@ import dataclasses
 
 from fastapi import APIRouter, HTTPException
 
-from backend.schemas.blackscholes import BsRequest
-from backend.services.blackscholes import price_bs
+from backend.pricing.schemas.blackscholes import BsRequest
+from backend.pricing.services.blackscholes import price_bs
 
 router = APIRouter(prefix="/api/bs")
 

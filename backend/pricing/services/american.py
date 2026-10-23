@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from backend.services.binomial import payoff
-from backend.services.helpers import trim
-from backend.services.multi_period import FULL_TREE_MAX_N
+from backend.pricing.services.binomial import payoff
+from backend.pricing.services.helpers import trim
+from backend.pricing.services.multi_period import FULL_TREE_MAX_N
 
 
 @dataclass
