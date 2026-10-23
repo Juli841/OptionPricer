@@ -3,11 +3,11 @@ import math
 import numpy as np
 import pytest
 
-from backend.services.continuous import (
+from backend.pricing.services.continuous import (
     MAX_STEPS, N_BINS, BinomialModel, GBM, crr_params, price_crr, simulate_gbm,
 )
-from backend.services.multi_period import price_multi_period
-from backend.services.simulation import N_SAMPLE
+from backend.pricing.services.multi_period import price_multi_period
+from backend.pricing.services.simulation import N_SAMPLE
 
 S0, MU, SIGMA, T = 100.0, 0.1, 0.2, 1.0
 

@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pytest
 
-from backend.services.simulation import MAX_PATHS, MAX_STEPS, N_SAMPLE, simulate_paths
+from backend.pricing.services.simulation import MAX_PATHS, MAX_STEPS, N_SAMPLE, simulate_paths
 
 S0, U, D = 100, 1.1, 0.9
 

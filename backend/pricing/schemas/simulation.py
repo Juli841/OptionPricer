@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
 
-from backend.services.simulation import MAX_PATHS, MAX_STEPS  # one source of truth for the caps
+from backend.pricing.services.simulation import MAX_PATHS, MAX_STEPS  # one source of truth for the caps
 
 
 class SimulationRequest(BaseModel):

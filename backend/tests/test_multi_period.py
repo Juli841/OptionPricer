@@ -2,8 +2,8 @@ import itertools
 
 import pytest
 
-from backend.services.binomial import payoff, price_one_period
-from backend.services.multi_period import FULL_TREE_MAX_N, price_multi_period
+from backend.pricing.services.binomial import payoff, price_one_period
+from backend.pricing.services.multi_period import FULL_TREE_MAX_N, price_multi_period
 
 S0, K, U, D, R = 100, 95, 1.05, 0.97, 0.01
 

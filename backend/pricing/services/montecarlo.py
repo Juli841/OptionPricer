@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from backend.services.continuous import Model
+from backend.pricing.services.continuous import Model
 
 MAX_MC_PATHS = 1_000_000  # one draw per path (terminal price only), so this is cheap
 N_CHECKPOINTS = 60  # points on the convergence plot

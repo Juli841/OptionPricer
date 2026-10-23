@@ -2,8 +2,8 @@ import dataclasses
 
 from fastapi import APIRouter, HTTPException
 
-from backend.schemas.continuous import CrrRequest, GbmRequest
-from backend.services.continuous import crr_params, price_crr, simulate_gbm
+from backend.pricing.schemas.continuous import CrrRequest, GbmRequest
+from backend.pricing.services.continuous import crr_params, price_crr, simulate_gbm
 
 router = APIRouter(prefix="/api/gbm")
 

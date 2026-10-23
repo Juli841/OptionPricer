@@ -1,7 +1,7 @@
 import pytest
 
-from backend.services.american import price_american
-from backend.services.multi_period import FULL_TREE_MAX_N, price_multi_period
+from backend.pricing.services.american import price_american
+from backend.pricing.services.multi_period import FULL_TREE_MAX_N, price_multi_period
 
 # (s0, k, u, d, r, n): a spread of shapes, one with a negative rate
 CASES = [

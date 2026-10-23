@@ -3,8 +3,8 @@ import math
 import numpy as np
 import pytest
 
-from backend.services.continuous import GBM, price_crr
-from backend.services.montecarlo import N_CHECKPOINTS, price_mc
+from backend.pricing.services.continuous import GBM, price_crr
+from backend.pricing.services.montecarlo import N_CHECKPOINTS, price_mc
 
 S0, K, SIGMA, R, T = 100.0, 100.0, 0.2, 0.05, 1.0
 MODEL = GBM(R, SIGMA)  # risk-neutral: drift = r

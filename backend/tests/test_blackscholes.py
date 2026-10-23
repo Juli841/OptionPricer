@@ -1,8 +1,8 @@
 import pytest
 
-from backend.services.blackscholes import price_bs
-from backend.services.continuous import price_crr
-from backend.services.montecarlo import price_mc  # check its signature before use
+from backend.pricing.services.blackscholes import price_bs
+from backend.pricing.services.continuous import price_crr
+from backend.pricing.services.montecarlo import price_mc  # check its signature before use
 
 S0, K, SIGMA, R, T = 100.0, 100.0, 0.2, 0.05, 1.0
 

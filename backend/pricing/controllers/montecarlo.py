@@ -2,9 +2,9 @@ import dataclasses
 
 from fastapi import APIRouter, HTTPException
 
-from backend.schemas.montecarlo import McRequest
-from backend.services.continuous import GBM
-from backend.services.montecarlo import price_mc
+from backend.pricing.schemas.montecarlo import McRequest
+from backend.pricing.services.continuous import GBM
+from backend.pricing.services.montecarlo import price_mc
 
 router = APIRouter(prefix="/api/mc")
 
